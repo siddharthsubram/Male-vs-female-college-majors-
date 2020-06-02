@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8">
+        <style>
+            .grid line {
+                stroke: lightgrey;
+                stroke-opacity: 2.0 ;
+                shape-rendering: crispEdges;
+            }
+        </style>
+        <!-- Load d3.js -->
+        <script src="https://d3js.org/d3.v5.js"></script>
+        
+    </head>
+    <body>
+        <h4> <t> </t>     Majors completed in USA by gender (2016) </h4>
+        <div id="my_dataviz"></div>
+        
+        <script>
+        
+            //graph margins
+            var margin = {top: 10, right: 30, bottom: 90, left: 100},
+            width = 800 - margin.left - margin.right,
+            height = 800 - margin.top - margin.bottom;
+
+            // creating SVG
+            var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            //CSV data created from data given from department of educaiton 
+            d3.csv("majors.csv").then(function(data){
+                console.log(data)
+
+                // Creating X axis scale
+                var x = d3.scaleLinear()
+                    .domain([0, 100000])
+                    .range([ 0, width])
+                
+                //Creating Y axis scale  
+                var y = d3.scaleBand()
+                    .domain(data.map(function(d){return d.Major}))
+                    .range([height,0])
+                    .padding(1)
+
+                //Creating X axis gridlines (We dont need y axis since the data is printed only left to right)      
+                function make_x_grid() {
+                    return d3.axisBottom(x).ticks(10); 
+                }
+                
+                //Appending gridlines first so that the gridlines appear below the rest of the graph 
+                svg.append("g")			
+                  .attr("class", "grid")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(make_x_grid()
+                      .tickSize(-height)
+                      .tickFormat("")
+                )
+            
+                
+                //Adds the x Axis to the graph, translating to view the text easier  
+                svg.append("g")
+                   .attr("transform", "translate(0," + height + ")")
+                   .call(d3.axisBottom(x))
+                   .selectAll("text")
+                   .attr("transform", "translate(-10,0)rotate(-45)")
+                   .style("text-anchor", "end");
+                
+                //adding y axis 
+                svg.append("g")
+                    .call(d3.axisLeft(y))
+                
+                //Text label for x axis 
+              svg.append("text")
+                  .attr("x", width/2 )
+                  .attr("y", height + 30)
+                  .attr("dy", "1em")
+                  .style("text-anchor", "middle")
+                  .text("Number of Students"); 
+                
+              // text label for the y axis
+              svg.append("text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("y", 0 - margin.left)
+                  .attr("x",0 - (height / 2))
+                  .attr("dy", "1em")
+                  .style("text-anchor", "middle")
+                  .text("Major"); 
+                
+                // Lines
+                svg.selectAll("myline")
+                  .data(data)
+                  .enter()
+                  .append("line")
+                    .attr("x1", function(d) {return x(d.Women)} )
+                    .attr("x2", function(d) {return x(d.Men)} ) 
+                    .attr("y1", function(d) {return y(d.Major)}  )
+                    .attr("y2", function(d) {return y(d.Major); })
+                    .attr("stroke", "black")
+
+               // Women circles
+               svg.selectAll("Women")
+                  .data(data)
+                  .enter()
+                  .append("circle")
+                    .attr("cx", function(d) {return x(d.Women)} )
+                    .attr("cy", function(d){ return y(d.Major)})
+                    .attr("r", "4")
+                    .style("fill", "Purple")
+                    .attr("stroke", "black")
+                
+               // Men Circles
+               svg.selectAll("Men")
+                  .data(data)
+                  .enter()
+                  .append("circle")
+                    .attr("cx", function(d) {return x(d.Men)} )
+                    .attr("cy", function(d){ return y(d.Major)})
+                    .attr("r", "4")
+                    .style("fill", "Cyan")
+                    .attr("stroke", "black")
+                
+                // Legend
+                svg.append("circle")
+                    .attr("cx",400)
+                    .attr("cy",20)
+                    .attr("r", "4")
+                    .style("fill", "Cyan")
+                    .attr("stroke", "black")
+                svg.append("text")
+                    .attr("x",410)
+                    .attr("y",25)
+                    .text("Male")
+                    .style("font-size", "10px")
+                 svg.append("circle")
+                    .attr("cx",400)
+                    .attr("cy",40)
+                    .attr("r", "4")
+                    .style("fill", "Purple")
+                    .attr("stroke", "black")
+                    .append("text")
+                    .attr("x",410)
+                    .attr("y",300)
+                svg.append("text")
+                    .attr("x",410)
+                    .attr("y",45)
+                    .text("Female")
+                    .style("font-size", "10px")
+            })
+
+            
+       
+        </script>
+        
+        <h4> Data from Department of education </h4>
+        <h4> <a href = "https://www.aei.org/carpe-diem/table-of-the-day-bachelors-degrees-for-the-class-of-2016-by-field-and-gender-oh-and-the-overall-25-6-college-degree-gap-for-men/">  link </a> </h4>
+    </body>
+</html>
